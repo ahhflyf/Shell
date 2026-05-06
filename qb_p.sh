@@ -4,7 +4,7 @@ export PATH
 # --------------------------------------------------------------
 #	系统: ALL
 #	项目: qBittorrent 便携版制作 脚本
-#	版本: 1.0.6
+#	版本: 1.0.7
 #	作者: XIU2
 #	官网: https://shell.xiu2.xyz
 #	项目: https://github.com/XIU2/Shell
@@ -25,7 +25,7 @@ FOLDER_UPLOAD="${FOLDER}/Upload" # 存放压缩后文件 并 上传的文件夹
 FILE_OLD_VER="${FOLDER}/old_ver.txt" # 存放旧版本号的文件（每次执行脚本都会检查最新版本）
 
 ARRAY=(_x64
-_qt6_lt20_x64)
+_lt20_x64)
 
 INFO="[信息]" && ERROR="[错误]" && TIP="[注意]"
 
@@ -83,12 +83,22 @@ _ZIP(){
 _UPLOAD(){
 	for (( i=0; i <= ((${#ARRAY[*]}-1)); i++ ))
 	do
-		#echo "${i} ${ARRAY[i]}"
+		echo -e "${INFO} 开始上传 qBittorrent_v${NEW_VER}${ARRAY[i]}_便携版.${FILE_FORMAT}..."
 		bash ${LZY_PATH} "${FOLDER_UPLOAD}/qBittorrent_v${NEW_VER}${ARRAY[i]}_便携版.${FILE_FORMAT}" "${FOLDER_ID}"
 		[[ ${?} -ne 0 ]] && echo -e "${ERROR} 上传到蓝奏云失败，终止后续！" && exit 1
 	done
 	
 	#_NOTICE "INFO" "qBittorrent_v${NEW_VER}" # 你可以取消井号注释，这样每次更新也会推送消息至微信
+}
+
+# 扫尾，控制上传文件夹内文件数量为最大 10 个
+_CLEANUP(){
+	cd ${FOLDER_UPLOAD}
+	FILE_COUNT=$(ls -1 | wc -l)
+	if [[ ${FILE_COUNT} -gt 10 ]]; then
+		REMOVE_COUNT=$((FILE_COUNT-10))
+		ls -1t | tail -n +11 | xargs rm -f
+	fi
 }
 
 # 消息推送至微信
@@ -113,7 +123,7 @@ _CHECK_VER "$1" # 运行脚本的时候传递参数可以指定版本号，例�
 
 for (( i=0; i <= ((${#ARRAY[*]}-1)); i++ ))
 	do
-		#echo "${i} ${ARRAY[i]}"
+		[[ -e "${FOLDER_UPLOAD}/qBittorrent_v${NEW_VER}${ARRAY[i]}_便携版.${FILE_FORMAT}" ]]  && echo -e "${INFO} qBittorrent_v${NEW_VER}${ARRAY[i]}_便携版.${FILE_FORMAT} 已经存在，跳过..." && continue # 如果压缩包已经存在，就跳过下载、解压、压缩步骤，直接进入下一轮循环（下一个版本）
 		_DOWNLOAD "${ARRAY[i]}"
 		_UNZIP "${ARRAY[i]}"
 		_ZIP "${ARRAY[i]}"
@@ -121,3 +131,4 @@ done
 
 echo -n ${NEW_VER} > ${FILE_OLD_VER}
 #_UPLOAD # 如果不想上传到蓝奏云，可以把这行注释掉（行首加井号）
+#_CLEANUP # 控制上传文件夹内文件数量为最大 10 个
