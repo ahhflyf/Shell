@@ -4,7 +4,7 @@ export PATH
 # --------------------------------------------------------------
 #	系统: ALL
 #	项目: 蓝奏云上传文件
-#	版本: 1.0.3
+#	版本: 1.0.4
 #	作者: XIU2
 #	官网: https://shell.xiu2.xyz
 #	项目: https://github.com/XIU2/Shell
@@ -27,11 +27,11 @@ INFO="[信息]" && ERROR="[错误]" && TIP="[注意]"
 
 # 检查是否已登录
 _CHECK_LOGIN() {
-	if [[ "${COOKIE_PHPDISK_INFO}" = "" || "${COOKIE_PHPDISK_INFO}" = "XXX" ]]; then
-		_NOTICE "ERROR" "请指定 Cookie 中 phpdisk_info 的值！"
+	if [[ -z "${COOKIE_PHPDISK_INFO}" || "${COOKIE_PHPDISK_INFO}" == "XXX" ]]; then
+		echo -e "${ERROR} 请指定 Cookie 中 phpdisk_info 的值！"
 	fi
-	if [[ "${COOKIE_YLOGIN}" = "" || "${COOKIE_YLOGIN}" = "XXX" ]]; then
-		_NOTICE "ERROR" "请指定 Cookie 中 ylogin 的值！"
+	if [[ -z "${COOKIE_YLOGIN}" || "${COOKIE_YLOGIN}" == "XXX" ]]; then
+		echo -e "${ERROR} 请指定 Cookie 中 ylogin 的值！"
 	fi
 
 	HTML_CHECK_LOGIN=$(curl -s --http1.1 -b "ylogin=${COOKIE_YLOGIN};phpdisk_info=${COOKIE_PHPDISK_INFO}" -H "${HEADER_CHECK_LOGIN}" "${URL_ACCOUNT}"|grep "登录")
