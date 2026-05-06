@@ -4,7 +4,7 @@ export PATH
 # --------------------------------------------------------------
 #	系统: ALL
 #	项目: qBittorrent Enhanced Edition 便携版制作 脚本
-#	版本: 1.0.7
+#	版本: 1.0.8
 #	作者: XIU2
 #	官网: https://shell.xiu2.xyz
 #	项目: https://github.com/XIU2/Shell
@@ -73,9 +73,20 @@ _ZIP(){
 
 #上传
 _UPLOAD(){
+	echo -e "${INFO} 开始上传 qBittorrentEE_v${NEW_VER}_x64_便携版.${FILE_FORMAT}..."
 	bash ${LZY_PATH} "${FOLDER_UPLOAD}/qBittorrentEE_v${NEW_VER}_x64_便携版.${FILE_FORMAT}" "${FOLDER_ID}"
 	[[ ${?} -ne 0 ]] && echo -e "${ERROR} 上传到蓝奏云失败，终止后续！" && exit 1
 	#_NOTICE "INFO" "qBittorrentEE_v${NEW_VER}" # 你可以取消井号注释，这样每次更新也会推送消息至微信
+}
+
+# 扫尾，控制上传文件夹内文件数量为最大 10 个
+_CLEANUP(){
+	cd ${FOLDER_UPLOAD}
+	FILE_COUNT=$(ls -1 | wc -l)
+	if [[ ${FILE_COUNT} -gt 10 ]]; then
+		REMOVE_COUNT=$((FILE_COUNT-10))
+		ls -1t | tail -n +11 | xargs rm -f
+	fi
 }
 
 # 通知
@@ -97,9 +108,11 @@ _NOTICE() {
 }
 
 _CHECK_VER "$1" # 运行脚本的时候传递参数可以指定版本号，例：bash qbee_p.sh "4.2.5.11"
+[[ -e "${FOLDER_UPLOAD}/qBittorrentEE_v${NEW_VER}_x64_便携版.${FILE_FORMAT}" ]] && echo -e "${INFO} qBittorrentEE_v${NEW_VER}_x64_便携版.${FILE_FORMAT} 已经存在，跳过..." && exit 1
 _DOWNLOAD
 _UNZIP
 _ZIP
 
 echo -n ${NEW_VER} > ${FILE_OLD_VER}
 #_UPLOAD # 如果不想上传到蓝奏云，可以把这行注释掉（行首加井号）
+#_CLEANUP # 控制上传文件夹内文件数量为最大 10 个
