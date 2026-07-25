@@ -4,7 +4,7 @@ export PATH
 # --------------------------------------------------------------
 #	系统: ALL
 #	项目: 蓝奏云上传文件
-#	版本: 1.0.4
+#	版本: 1.0.5
 #	作者: XIU2
 #	官网: https://shell.xiu2.xyz
 #	项目: https://github.com/XIU2/Shell
@@ -15,13 +15,13 @@ COOKIE_PHPDISK_INFO="XXX" # 替换 XXX 为 Cookie 中 phpdisk_info 的值
 COOKIE_YLOGIN="XXX" # 替换 XXX 为 Cookie 中 ylogin 的值
 TOKEN="XXX" # 微信推送链接 Token，可选
 
-UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"
+UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4569.10 Safari/537.36"
 HEADER_CHECK_LOGIN="User-Agent: ${UA}
-Referer: https://up.woozooo.com/mydisk.php?item=files&action=index&u=${USERNAME}
+Referer: https://pc.woozooo.com/mydisk.php?item=files&action=index&u=${COOKIE_YLOGIN}
 Accept-Language: zh-CN,zh;q=0.9"
 
 URL_ACCOUNT="https://pc.woozooo.com/account.php"
-URL_UPLOAD="https://up.woozooo.com/fileup.php"
+URL_UPLOAD="https://pc.woozooo.com/html5up.php"
 
 INFO="[信息]" && ERROR="[错误]" && TIP="[注意]"
 
@@ -41,8 +41,8 @@ _CHECK_LOGIN() {
 # 上传文件
 _UPLOAD() {
 	[[ $(du "${NAME_FILE}"|awk '{print $1}') -gt 100000000 ]] && _NOTICE "ERROR" "${NAME}文件大于 100MB！"
-	HTML_UPLOAD=$(curl --connect-timeout 120 -m 5000 --retry 2 -s -b "ylogin=${COOKIE_YLOGIN};phpdisk_info=${COOKIE_PHPDISK_INFO}" -H "${URL_UPLOAD}" -F "task=1" -F "id=WU_FILE_0" -F "folder_id=${FOLDER_ID}" -F "name=${NAME}" -F "upload_file=@${NAME_FILE}" "${URL_UPLOAD}"|grep '\\u4e0a\\u4f20\\u6210\\u529f')
-	[[ -z "${HTML_UPLOAD}" ]] && _NOTICE "ERROR" "${NAME}文件上传失败！"
+	HTML_UPLOAD=$(curl --http1.1 --connect-timeout 120 -m 5000 --retry 2 -s -b "ylogin=${COOKIE_YLOGIN};phpdisk_info=${COOKIE_PHPDISK_INFO}" -H "${HEADER_CHECK_LOGIN}" -F "task=1" -F "id=WU_FILE_0" -F "folder_id=${FOLDER_ID}" -F "name=${NAME}" -F "upload_file=@${NAME_FILE}" "${URL_UPLOAD}"|grep '\\u4e0a\\u4f20\\u6210\\u529f')
+	[[ -z "${HTML_UPLOAD}" ]] && _NOTICE "ERROR" "${NAME} 文件上传失败！"
 	echo -e "${INFO} 文件上传成功！[$(date '+%Y/%m/%d %H:%M')]"
 }
 
